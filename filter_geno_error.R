@@ -12,9 +12,6 @@ outfile <- args[length(args)]
 
 ASE_file <- read.table(infile, header=TRUE)
 
-# Filter to ASE files we're interested in
-# ASE_tissues <- ASE_file %>% filter(TISSUE_ID %in% tissues)
-
 ## For every variant, 
 ### calculate the number of tissues each allele appears in and 
 ### the total number of reads (across tissues) supporting that read

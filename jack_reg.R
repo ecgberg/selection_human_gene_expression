@@ -35,28 +35,11 @@ precompute_ids <- function(orig_tab) {
   return(row_ids)
 }
 
-# Run regression (commented out version is regress out total SNPs, work on proportion SNPs in each AF bin) (as of 0125, version is vanilla on COUNTS in each AF bin - counts version doesn't cut out large or small allele counts)
+# Run regression 
 get_bin_regs <- function(spec) {
   
-  # regress out total SNP count
-  # J2_byTOTAL <-  summary(lm(adj_J2 ~ TOTAL_COUNTS, data=spec))
-  
-  # Remove tails of data based on counts (90% CI as default)
-  # tail_val <- (1-CI_size)/2
-  # tails <- quantile(spec$TOTAL_COUNTS, c(tail_val, 1-tail_val))
-  # filt_log <- spec$TOTAL_COUNTS >= tails[1] & spec$TOTAL_COUNTS <= tails[2]
-  
-  # filt_spec <- spec[filt_log,]
-  # print(dim(filt_spec))
-
-  # clean up df for regression (filter outlier genes and extraneous data)
-  # count_spectra <- filt_spec[,1:10]/spec$TOTAL_COUNTS[filt_log]
-  # spec$X_new <- spec$X0 + spec$X1
-  count_spectra <- spec %>% select(`X1`:`X9`, adj_J2) # 1015
-  # count_spectra <- spec %>% mutate(total_sites=rowSums(.[grep('X', names(.))], na.rm=TRUE)) %>% transmute_at(vars(`X0`:`X9`), funs(./total_sites)) # EDITED 0219
-  # count_spectra$adj_J2 <- spec$adj_J2
+  count_spectra <- spec %>% select(`X1`:`X9`, adj_J2) 
   print(head(count_spectra))
-  # count_spectra$adj_J2 <- filt_spec$adj_J2 / spec$TOTAL_COUNTS[filt_log] # edited 112917 to estimate RELATIVE EFFECT SIZES of rare v common (B_jGamm_j) and then on 1215 to remove 'residuals' from total het site regression
   
   # run regression, no intercept, order levels
   c.J2_byAFbin <- data.frame(summary(lm(adj_J2 ~ . , data=count_spectra))$coefficients)
@@ -80,7 +63,6 @@ print('base regresions')
 
 # Get a jacknife sample leaving out the fold-th fold
 jack <- function(spec, precomputed_ids, fold) {
-  # jsamp <- spec[spec$GENE_ID!=fold,]
   jsamp <- spec[-c(precomputed_ids[[fold]]),]
   return(jsamp)
 }
@@ -114,8 +96,6 @@ jack_estimates <- function(full_sample,
     return(js)
   }
   
-  # jack_variance <- ddply(j_vs, .(bin), summarize,
-  #                        jack_var=sum(weighted_variance)/length(unique(rep)))
   jack_variance <- j_vs %>% group_by(bin) %>% summarize(jack_var=sum(weighted_variance)/length(unique(rep)))
   jack_estimate <- left_join(jack_estimate, jack_variance)
   

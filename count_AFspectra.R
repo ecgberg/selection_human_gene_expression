@@ -115,13 +115,9 @@ j.ASE_dat <- c.ASE_dat %>%
 ## Merge ASE measurements and variant counts - this is where you'll lose a lot of SNP counts
 GTEx_spectra <- left_join(j.ASE_dat, gtex_gene_counts, 
                           by=c('CHR'='#CHROM', 'ensembl_gene_id', 'SUBJECT_ID'='SUB', 'transcription_start_site')) # tss
-# THIS LEFT JOIN ADDS SOME ROWS WITH NO VARIABLE SITES IN CIS
-# IN THIS CASE, THOSE ROWS ARE VALID ZERO MEASUREMENTS
 
 gnomAD_spectra <- left_join(j.ASE_dat, gnom_gene_counts, 
                             by=c('CHR'='#CHROM', 'ensembl_gene_id', 'SUBJECT_ID'='SUB', 'transcription_start_site')) # tss
-# IN THIS CASE, I MAY HAVE SOME ROWS WITH VARIANTS IN GTEx IN CIS THAT JUST DON'T HAVE ALLELE FREQUENCIES IN GNOMAD - THOSE ROWS SHOULD GET REMOVED BECAUSE I DON'T KNOW WHERE TO COUNT THEM
-# actually, shouldn't have to check. should count the rows as 0s above if there's a row. NAs can also count towards the 'total' variant count for regression, but be unassigned to a bin for regression/permutation
 
 ## write it out
 write.table(GTEx_spectra, file=gtex_regressionfile, row.names=FALSE, sep=' ', quote=FALSE)
